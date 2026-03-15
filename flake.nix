@@ -16,6 +16,7 @@
 
   outputs =
     {
+      self,
       nixpkgs,
       rust-overlay,
       flake-utils,
@@ -51,7 +52,7 @@
           cargoLock.lockFile = ./Cargo.lock;
         };
         formatter = treefmtEval.config.build.wrapper;
-        checks.formatting = treefmtEval.config.build.check;
+        checks.formatting = treefmtEval.config.build.check self;
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             rustToolchain
