@@ -43,16 +43,31 @@
           programs.rustfmt.enable = true;
           programs.taplo.enable = true;
         };
-      in
-      {
-        packages.default = pkgs.rustPlatform.buildRustPackage {
+        cratePackage = pkgs.rustPlatform.buildRustPackage {
           pname = "r-aizawa-mcp";
           version = "0.1.0";
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
         };
+      in
+      {
+        packages.default = cratePackage;
         formatter = treefmtEval.config.build.wrapper;
-        checks.formatting = treefmtEval.config.build.check self;
+        checks = {
+          formatting = treefmtEval.config.build.check self;
+          build = cratePackage;
+          clippy = cratePackage.overrideAttrs (old: {
+            pname = "${old.pname}-clippy";
+            nativeBuildInputs = (old.nativeBuildInputs or [ ]) ++ [ pkgs.clippy ];
+            buildPhase = "cargo clippy -- -D warnings";
+            installPhase = "touch $out";
+          });
+          test = cratePackage.overrideAttrs (old: {
+            pname = "${old.pname}-test";
+            buildPhase = "cargo test";
+            installPhase = "touch $out";
+          });
+        };
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             rustToolchain
