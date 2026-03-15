@@ -44,6 +44,12 @@
         };
       in
       {
+        packages.default = pkgs.rustPlatform.buildRustPackage {
+          pname = "r-aizawa-mcp";
+          version = "0.1.0";
+          src = ./.;
+          cargoLock.lockFile = ./Cargo.lock;
+        };
         formatter = treefmtEval.config.build.wrapper;
         checks.formatting = treefmtEval.config.build.check;
         devShells.default = pkgs.mkShell {
